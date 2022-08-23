@@ -87,4 +87,8 @@ jobs:
         name: JavaVulnerableLab
         path: ./
     - name: build Image
-      run: docker image build . -t ghcr.io/javavulnerablelab:latest
+      run: docker image build . -t ghcr.io/kmayer10/javavulnerablelab:latest
+    - name: login to GHCR
+      run: docker login ghcr.io -u kmayer10 -p ${{ secrets.PAT }}
+    - name: Push Image
+      run: docker image push ghcr.io/kmayer10/javavulnerablelab:latest
