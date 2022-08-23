@@ -114,7 +114,37 @@ jobs:
       run: docker image pull ghcr.io/f1-p1/javavulnerablelab:latest
     - name: Scan Image
       run: trivy image ghcr.io/f1-p1/javavulnerablelab:latest
-    
+      
+  deploy-application:
+    needs: 
+      - image-scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: run deployment
+        run: echo "[INFO] Running Deployment"      
+      
+  dast:
+    needs: 
+      - deploy-application
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Docker
+      run: |
+        sudo apt update -y 
+        sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" && sudo apt update
+        apt-cache policy docker-ce
+        sudo apt install -y docker-ce
+    - name: running zap
+      run: sh run_zap.sh
+    - name: upload zap report
+      uses: actions/upload-artifact@v2
+      with: 
+        name: Zap_Report
+        path: zap_baseline_report.html
+  
   sonar-check:
     runs-on: ubuntu-latest
     steps:
